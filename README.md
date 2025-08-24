@@ -1,12 +1,10 @@
-## Full stack NFT marketplace built with Polygon, Solidity, IPFS, & Next.js
+## Overview
 
-![Header](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pfofv47dooojerkmfgr4.png)
+This is an Ethereum scaffold built with Solidity, IPFS, & Next.js with modern tooling including Hardhat v2 & Rocketh deployment system.
 
-This is the codebase to go along with tbe blog post [Building a Full Stack NFT Marketplace on Ethereum with Polygon](https://dev.to/dabit3/building-scalable-full-stack-apps-on-ethereum-with-polygon-2cfb)
+## Running this project
 
-### Running this project
-
-#### Gitpod
+### Gitpod
 
 To deploy this project to Gitpod, follow these steps:
 
@@ -28,82 +26,83 @@ The chain ID should be 1337. If you have a localhost rpc set up, you may need to
 
 #### Local setup
 
-To run this project locally, follow these steps.
+To run this project locally, follow these steps:
 
 1. Clone the project locally, change into the directory, and install the dependencies:
 
 ```sh
-git clone https://github.com/dabit3/polygon-ethereum-nextjs-marketplace.git
-
-cd polygon-ethereum-nextjs-marketplace
-
-# install using NPM or Yarn
+git clone <repository-url>
+cd ethereum-scaffold
 npm install
-
-# or
-
-yarn
 ```
 
-2. Start the local Hardhat node
+2. Start the local Hardhat node:
 
 ```sh
-npx hardhat node
+npm run chain
 ```
 
-3. With the network running, deploy the contracts to the local network in a separate terminal window
+3. Deploy contracts and export artifacts (in a separate terminal):
 
 ```sh
-npx hardhat run scripts/deploy.js --network localhost
+npm run deploy
+npm run export
 ```
 
-4. Start the app
+4. Start the Next.js development server:
 
-```
+```sh
 npm run dev
+```
+
+## Development Workflow
+
+When working with smart contracts, follow this development flow:
+
+1. **Create/update smart contract** in the `/contracts` folder
+2. **(Optional) Create deployment script** in the `/deploy` folder using the Rocketh deployment system
+3. **Deploy contracts**: `npm run deploy`
+4. **Export artifacts**: `npm run export`
+
+After running these commands, the contract artifacts will be updated in `/contracts/artifacts.json` and available for use in the frontend.
+
+### Available Scripts
+
+- `npm run dev` - Start Next.js development server
+- `npm run chain` - Start local Hardhat node
+- `npm run compile` - Compile smart contracts
+- `npm run deploy` - Deploy contracts using Rocketh to localhost
+- `npm run export` - Export contract artifacts to `/contracts/artifacts.json`
+- `npm run build` - Build Next.js application for production
+- `npm run start` - Start Next.js production server
+- `npm run lint` - Run ESLint
+
+### Project Structure
+
+```
+contracts/          # Smart contracts and artifacts
+├── NFTMarketplace.sol
+└── artifacts.json   # Exported contract artifacts
+
+deploy/              # Rocketh deployment scripts
+└── 01_deploy_nft_marketplace.js
+
+pages/               # Next.js pages
+├── index.js         # Home page
+├── create-nft.js    # NFT creation
+├── dashboard.js     # Creator dashboard
+├── my-nfts.js       # User's NFTs
+└── resell-nft.js    # Resell NFTs
+
+rocketh.js           # Rocketh configuration
+hardhat.config.js    # Hardhat configuration
 ```
 
 ### Configuration
 
-To deploy to Polygon test or main networks, update the configurations located in __hardhat.config.js__ to use a private key and, optionally, deploy to a private RPC like Infura.
+To deploy to other networks, update the network configurations in `hardhat.config.js` and `rocketh.js`. For testnets or mainnet, you'll need to:
 
-```javascript
-require("@nomiclabs/hardhat-waffle");
-const fs = require('fs');
-const privateKey = fs.readFileSync(".secret").toString().trim() || "01234567890123456789";
-
-// infuraId is optional if you are using Infura RPC
-const infuraId = fs.readFileSync(".infuraid").toString().trim() || "";
-
-module.exports = {
-  defaultNetwork: "hardhat",
-  networks: {
-    hardhat: {
-      chainId: 1337
-    },
-    mumbai: {
-      // Infura
-      // url: `https://polygon-mumbai.infura.io/v3/${infuraId}`
-      url: "https://rpc-mumbai.matic.today",
-      accounts: [privateKey]
-    },
-    matic: {
-      // Infura
-      // url: `https://polygon-mainnet.infura.io/v3/${infuraId}`,
-      url: "https://rpc-mainnet.maticvigil.com",
-      accounts: [privateKey]
-    }
-  },
-  solidity: {
-    version: "0.8.4",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
-    }
-  }
-};
-```
-
-If using Infura, update __.infuraid__ with your [Infura](https://infura.io/) project ID.
+1. Add network configuration to both config files
+2. Set up private keys securely
+3. Configure RPC endpoints (e.g., Infura, Alchemy)
+4. Update the deploy script target network

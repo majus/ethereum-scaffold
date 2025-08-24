@@ -2,8 +2,12 @@ import { useState } from 'react';
 import { ethers } from 'ethers';
 import { create as ipfsHttpClient } from 'ipfs-http-client';
 import { useRouter } from 'next/router';
-import Web3Modal from 'web3modal';
-import NFTMarketplace from '../artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json';
+import {
+  useAppKit,
+  useAppKitProvider,
+  useAppKitAccount,
+} from '@reown/appkit/react';
+import { getNFTMarketplace } from '../lib/contracts';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -47,20 +51,23 @@ export default function CreateItem() {
     }
   }
 
+  const { open } = useAppKit();
+  const { walletProvider } = useAppKitProvider('eip155');
+  const { isConnected } = useAppKitAccount();
+
   async function listNFTForSale() {
+    if (!isConnected || !walletProvider) {
+      open();
+      return;
+    }
+
     const url = await uploadToIPFS();
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
+    const provider = new ethers.BrowserProvider(walletProvider);
+    const signer = await provider.getSigner();
 
     /* next, create the item */
-    const price = ethers.utils.parseUnits(formInput.price, 'ether');
-    let contract = new ethers.Contract(
-      NFTMarketplace.address,
-      NFTMarketplace.abi,
-      signer
-    );
+    const price = ethers.parseUnits(formInput.price, 'ether');
+    let contract = await getNFTMarketplace(signer);
     let listingPrice = await contract.getListingPrice();
     listingPrice = listingPrice.toString();
     let transaction = await contract.createToken(url, price, {

@@ -6,28 +6,34 @@
   "scripts": {
     "dev": "next dev",
     "chain": "hardhat node",
-    "deploy": "hardhat run scripts/deploy.js",
+    "compile": "hardhat compile",
+    "deploy": "hardhat ignition deploy ignition/modules/NFTMarketplace.js --network localhost",
+    "export": "hardhat run scripts/export.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.0",
+    "@nomicfoundation/hardhat-ignition-ethers": "^3.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@solidstate/hardhat-abi-exporter": "^3.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.34.0",
     "eslint-config-next": "^15.5.0",
+    "hardhat": "^3.0.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.12"
   },
   "dependencies": {
-    "@nomicfoundation/hardhat-ethers": "^4.0.0",
-    "@openzeppelin/contracts": "^5.4.0",
+    "@reown/appkit": "^1.7.20",
+    "@reown/appkit-adapter-ethers": "^1.7.20",
+    "@tailwindcss/postcss": "^4.1.12",
     "axios": "^1.11.0",
     "ethers": "^6.15.0",
-    "hardhat": "^3.0.1",
     "ipfs-http-client": "^60.0.1",
     "next": "^15.5.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "web3modal": "^1.9.12"
+    "react-dom": "^19.1.1"
   }
 }

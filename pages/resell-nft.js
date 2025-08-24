@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import Web3Modal from 'web3modal';
-import NFTMarketplace from '../artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json';
+import {
+  useAppKit,
+  useAppKitProvider,
+  useAppKitAccount,
+} from '@reown/appkit/react';
+import { getNFTMarketplace } from '../lib/contracts';
 
 export default function ResellNFT() {
   const [formInput, updateFormInput] = useState({ price: '', image: '' });
@@ -21,19 +25,22 @@ export default function ResellNFT() {
     updateFormInput((state) => ({ ...state, image: meta.data.image }));
   }
 
+  const { open } = useAppKit();
+  const { walletProvider } = useAppKitProvider('eip155');
+  const { isConnected } = useAppKitAccount();
+
   async function listNFTForSale() {
     if (!price) return;
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
+    if (!isConnected || !walletProvider) {
+      open();
+      return;
+    }
 
-    const priceFormatted = ethers.utils.parseUnits(formInput.price, 'ether');
-    let contract = new ethers.Contract(
-      NFTMarketplace.address,
-      NFTMarketplace.abi,
-      signer
-    );
+    const provider = new ethers.BrowserProvider(walletProvider);
+    const signer = await provider.getSigner();
+
+    const priceFormatted = ethers.parseUnits(formInput.price, 'ether');
+    let contract = await getNFTMarketplace(signer);
     let listingPrice = await contract.getListingPrice();
 
     listingPrice = listingPrice.toString();
