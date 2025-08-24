@@ -1,15 +1,13 @@
-const hre = require("hardhat");
-const fs = require('fs');
+import { network } from 'hardhat';
 
 async function main() {
-  const NFTMarketplace = await hre.ethers.getContractFactory("NFTMarketplace");
+  console.log('Deploying NFTMarketplace...');
+  const { ethers } = await network.connect();
+  const NFTMarketplace = await ethers.getContractFactory('NFTMarketplace');
   const nftMarketplace = await NFTMarketplace.deploy();
-  await nftMarketplace.deployed();
-  console.log("nftMarketplace deployed to:", nftMarketplace.address);
-
-  fs.writeFileSync('./config.js', `
-  export const marketplaceAddress = "${nftMarketplace.address}"
-  `)
+  await nftMarketplace.waitForDeployment();
+  const address = await nftMarketplace.getAddress();
+  console.log('NFT marketplace deployed to:', address);
 }
 
 main()
