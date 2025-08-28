@@ -15,15 +15,10 @@ export default function Home() {
     loadNFTs();
   }, []);
   async function loadNFTs() {
-    /* create a generic provider and query for unsold market items */
     const provider = new ethers.JsonRpcProvider();
     const contract = await getNFTMarketplace(provider);
     const data = await contract.fetchMarketItems();
 
-    /*
-     *  map over items returned from smart contract and format
-     *  them as well as fetch their token metadata
-     */
     const items = await Promise.all(
       data.map(async (i) => {
         const tokenUri = await contract.tokenURI(i.tokenId);
@@ -58,7 +53,6 @@ export default function Home() {
     const signer = await provider.getSigner();
     const contract = await getNFTMarketplace(signer);
 
-    /* user will be prompted to pay the asking proces to complete the transaction */
     const price = ethers.parseUnits(nft.price.toString(), 'ether');
     const transaction = await contract.createMarketSale(nft.tokenId, {
       value: price,

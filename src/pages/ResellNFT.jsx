@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import { useRouter } from 'next/router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
   useAppKit,
@@ -11,8 +11,10 @@ import { getNFTMarketplace } from '../lib/contracts';
 
 export default function ResellNFT() {
   const [formInput, updateFormInput] = useState({ price: '', image: '' });
-  const router = useRouter();
-  const { id, tokenURI } = router.query;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get('id');
+  const tokenURI = searchParams.get('tokenURI');
   const { image, price } = formInput;
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function ResellNFT() {
     });
     await transaction.wait();
 
-    router.push('/');
+    navigate('/');
   }
 
   return (

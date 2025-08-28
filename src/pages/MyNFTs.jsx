@@ -6,11 +6,13 @@ import {
   useAppKitProvider,
   useAppKitAccount,
 } from '@reown/appkit/react';
+import { useNavigate } from 'react-router-dom';
 import { getNFTMarketplace } from '../lib/contracts';
 
-export default function CreatorDashboard() {
+export default function MyAssets() {
   const [nfts, setNfts] = useState([]);
   const [loadingState, setLoadingState] = useState('not-loaded');
+  const navigate = useNavigate();
   useEffect(() => {
     loadNFTs();
   }, []);
@@ -27,13 +29,13 @@ export default function CreatorDashboard() {
     const provider = new ethers.BrowserProvider(walletProvider);
     const signer = await provider.getSigner();
 
-    const contract = await getNFTMarketplace(signer);
-    const data = await contract.fetchItemsListed();
+    const marketplaceContract = await getNFTMarketplace(signer);
+    const data = await marketplaceContract.fetchMyNFTs();
 
     const items = await Promise.all(
       data.map(async (i) => {
-        const tokenUri = await contract.tokenURI(i.tokenId);
-        const meta = await axios.get(tokenUri);
+        const tokenURI = await marketplaceContract.tokenURI(i.tokenId);
+        const meta = await axios.get(tokenURI);
         let price = ethers.formatUnits(i.price.toString(), 'ether');
         let item = {
           price,
@@ -41,20 +43,23 @@ export default function CreatorDashboard() {
           seller: i.seller,
           owner: i.owner,
           image: meta.data.image,
+          tokenURI,
         };
         return item;
       })
     );
-
     setNfts(items);
     setLoadingState('loaded');
   }
+  function listNFT(nft) {
+    console.log('nft:', nft);
+    navigate(`/resell-nft?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`);
+  }
   if (loadingState === 'loaded' && !nfts.length)
-    return <h1 className="py-10 px-20 text-3xl">No NFTs listed</h1>;
+    return <h1 className="py-10 px-20 text-3xl">No NFTs owned</h1>;
   return (
-    <div>
+    <div className="flex justify-center">
       <div className="p-4">
-        <h2 className="text-2xl py-2">Items Listed</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
           {nfts.map((nft, i) => (
             <div key={i} className="border shadow rounded-xl overflow-hidden">
@@ -63,6 +68,12 @@ export default function CreatorDashboard() {
                 <p className="text-2xl font-bold text-white">
                   Price - {nft.price} Eth
                 </p>
+                <button
+                  className="mt-4 w-full bg-pink-500 text-white font-bold py-2 px-12 rounded"
+                  onClick={() => listNFT(nft)}
+                >
+                  List
+                </button>
               </div>
             </div>
           ))}

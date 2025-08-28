@@ -2,10 +2,9 @@ import { createAppKit } from '@reown/appkit/react';
 import { EthersAdapter } from '@reown/appkit-adapter-ethers';
 import { hardhat } from '@reown/appkit/networks';
 
-// 1. Get projectId from https://dashboard.reown.com
-const projectId = 'YOUR_PROJECT_ID';
+// 1. Get projectId from environment variables
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 
-// 2. Set the networks
 const networks = [hardhat];
 
 // 3. Create a metadata object - optional

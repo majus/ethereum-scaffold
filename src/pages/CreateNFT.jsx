@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { create as ipfsHttpClient } from 'ipfs-http-client';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import {
   useAppKit,
   useAppKitProvider,
@@ -18,7 +18,7 @@ export default function CreateItem() {
     name: '',
     description: '',
   });
-  const router = useRouter();
+  const navigate = useNavigate();
 
   async function onChange(e) {
     const file = e.target.files[0];
@@ -35,7 +35,6 @@ export default function CreateItem() {
   async function uploadToIPFS() {
     const { name, description, price } = formInput;
     if (!name || !description || !price || !fileUrl) return;
-    /* first, upload to IPFS */
     const data = JSON.stringify({
       name,
       description,
@@ -44,7 +43,6 @@ export default function CreateItem() {
     try {
       const added = await client.add(data);
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      /* after file is uploaded to IPFS, return the URL to use it in the transaction */
       return url;
     } catch (error) {
       console.log('Error uploading file: ', error);
@@ -65,7 +63,6 @@ export default function CreateItem() {
     const provider = new ethers.BrowserProvider(walletProvider);
     const signer = await provider.getSigner();
 
-    /* next, create the item */
     const price = ethers.parseUnits(formInput.price, 'ether');
     let contract = await getNFTMarketplace(signer);
     let listingPrice = await contract.getListingPrice();
@@ -75,7 +72,7 @@ export default function CreateItem() {
     });
     await transaction.wait();
 
-    router.push('/');
+    navigate('/');
   }
 
   return (
